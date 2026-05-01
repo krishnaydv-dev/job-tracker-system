@@ -37,3 +37,16 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# IntelliJ
+.idea/
+*.iml
+
+# SmartTomcat
+.smarttomcat/
+
+# Maven
+target/
+
+# OS
+.DS_Store
