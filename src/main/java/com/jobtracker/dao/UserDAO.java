@@ -45,17 +45,8 @@ public class UserDAO {
 
             ResultSet rs = ps.executeQuery();
 
-            // DEBUG
-            System.out.println("=== DAO DEBUG ===");
-            System.out.println("Looking for email: " + email);
-
             if (rs.next()) {
                 String storedPassword = rs.getString("password");
-
-                // DEBUG
-                System.out.println("User found: " + rs.getString("full_name"));
-                System.out.println("Stored hash: " + storedPassword);
-                System.out.println("BCrypt result: " + BCrypt.checkpw(password, storedPassword));
 
                 if (BCrypt.checkpw(password, storedPassword)) {
                     User user = new User();

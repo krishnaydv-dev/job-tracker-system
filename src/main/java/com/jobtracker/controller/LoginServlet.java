@@ -29,11 +29,6 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        // DEBUG
-        System.out.println("=== LOGIN DEBUG ===");
-        System.out.println("Email: " + email);
-        System.out.println("Password: " + password);
-
         UserDAO userDAO = new UserDAO();
         User user = userDAO.loginUser(email, password);
 
