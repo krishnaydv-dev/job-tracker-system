@@ -13,9 +13,6 @@ import java.io.IOException;
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
-    private UserDAO userDAO = new UserDAO();
-
-    // Show login page
     @Override
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response)
@@ -24,7 +21,6 @@ public class LoginServlet extends HttpServlet {
                 "/views/login.jsp").forward(request, response);
     }
 
-    // Handle login form submission
     @Override
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response)
@@ -33,28 +29,31 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
+        // DEBUG
+        System.out.println("=== LOGIN DEBUG ===");
+        System.out.println("Email: " + email);
+        System.out.println("Password: " + password);
+
         UserDAO userDAO = new UserDAO();
         User user = userDAO.loginUser(email, password);
 
+        System.out.println("User returned: " + user);
+
         if (user != null) {
-            // Create session
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
             session.setAttribute("userId", user.getId());
             session.setAttribute("userName", user.getFullName());
             session.setAttribute("role", user.getRole());
 
-            // Redirect based on role
             if ("ADMIN".equals(user.getRole())) {
                 response.sendRedirect(
-                        request.getContextPath() +
-                                "/views/admin/adminDashboard.jsp");
+                        request.getContextPath() + "/admin");
             } else {
                 response.sendRedirect(
                         request.getContextPath() + "/dashboard");
             }
         } else {
-            // Login failed
             request.setAttribute("error",
                     "Invalid email or password. Please try again.");
             request.getRequestDispatcher(
