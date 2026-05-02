@@ -4,6 +4,8 @@ import com.jobtracker.dao.JobApplicationDAO;
 import com.jobtracker.dao.UserDAO;
 import com.jobtracker.model.JobApplication;
 import com.jobtracker.model.User;
+import com.jobtracker.dao.ResumeDAO;
+import com.jobtracker.model.Resume;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -146,6 +148,55 @@ public class AdminServlet extends HttpServlet {
 
                 response.sendRedirect(request.getContextPath()
                         + "/admin?action=viewApplicants");
+                break;
+
+            case "viewResume":
+                // Get userId from URL
+                // e.g. /admin?action=viewResume&userId=3
+                int resumeUserId = Integer.parseInt(
+                        request.getParameter("userId"));
+
+                // Fetch resume from DB
+                ResumeDAO resumeDAO = new ResumeDAO();
+                Resume resume = resumeDAO.getResumeByUserId(resumeUserId);
+
+                if (resume != null) {
+                    // Get actual file path on server
+                    String filePath = getServletContext()
+                            .getRealPath(resume.getFilePath());
+
+                    java.io.File file = new java.io.File(filePath);
+
+                    if (file.exists()) {
+                        // Tell browser this is a PDF file
+                        response.setContentType("application/pdf");
+                        // Open in browser instead of downloading
+                        response.setHeader("Content-Disposition",
+                                "inline; filename=\"" + resume.getFileName() + "\"");
+                        response.setContentLength((int) file.length());
+
+                        // Stream file to browser
+                        try (java.io.FileInputStream fis =
+                                     new java.io.FileInputStream(file);
+                             java.io.OutputStream os =
+                                     response.getOutputStream()) {
+
+                            byte[] buffer = new byte[1024];
+                            int bytesRead;
+                            while ((bytesRead = fis.read(buffer)) != -1) {
+                                os.write(buffer, 0, bytesRead);
+                            }
+                        }
+                    } else {
+                        // File not found on server
+                        response.sendRedirect(request.getContextPath()
+                                + "/admin?action=viewApplicants&error=resumeNotFound");
+                    }
+                } else {
+                    // No resume in DB for this user
+                    response.sendRedirect(request.getContextPath()
+                            + "/admin?action=viewApplicants&error=noResume");
+                }
                 break;
 
             default:

@@ -2,7 +2,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="com.jobtracker.model.JobApplication" %>
 <%
-    // Session check
     if (session.getAttribute("user") == null) {
         response.sendRedirect(request.getContextPath() + "/views/login.jsp");
         return;
@@ -11,7 +10,7 @@
 
     List<JobApplication> applications =
         (List<JobApplication>) request.getAttribute("applications");
-    int totalApplications = (Integer) request.getAttribute("totalApplications") != null
+    int totalApplications = request.getAttribute("totalApplications") != null
         ? (Integer) request.getAttribute("totalApplications") : 0;
     int totalApplied = request.getAttribute("totalApplied") != null
         ? (Integer) request.getAttribute("totalApplied") : 0;
@@ -28,113 +27,193 @@
     <title>Dashboard - Job Tracker</title>
     <link rel="stylesheet"
 href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         .sidebar {
             min-height: 100vh;
             background-color: #2c3e50;
+            position: sticky;
+            top: 0;
+        }
+        .sidebar .brand {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 20px;
+            border-bottom: 1px solid #34495e;
+            display: block;
         }
         .sidebar a {
-            color: #ecf0f1;
+            color: #bdc3c7;
             text-decoration: none;
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             padding: 12px 20px;
+            font-size: 14px;
+            transition: all 0.2s;
         }
         .sidebar a:hover {
             background-color: #34495e;
+            color: white;
+        }
+        .sidebar a.active {
+            background-color: #34495e;
+            color: white;
+            border-left: 3px solid #3498db;
+        }
+        .sidebar .logout-link {
+            color: #e74c3c !important;
+        }
+        .sidebar .logout-link:hover {
+            background-color: #c0392b !important;
+            color: white !important;
         }
         .stat-card {
             border-radius: 10px;
             color: white;
             padding: 20px;
+            transition: transform 0.2s;
         }
+        .stat-card:hover { transform: translateY(-3px); }
+        .main-content { background-color: #f8f9fa; }
     </style>
 </head>
-<body class="bg-light">
-
+<body>
 <div class="d-flex">
 
     <!-- Sidebar -->
-    <div class="sidebar p-3" style="width: 220px;">
-        <h5 class="text-white mb-4">Job Tracker</h5>
-        <a href="${pageContext.request.contextPath}/dashboard">
-            🏠 Dashboard
-        </a>
-        <a href="${pageContext.request.contextPath}/application?action=add">
-            ➕ Add Application
-        </a>
-        <a href="${pageContext.request.contextPath}/application?action=list">
-            📋 My Applications
-        </a>
-        <a href="${pageContext.request.contextPath}/views/uploadResume.jsp">
-            📄 Upload Resume
-        </a>
-        <a href="${pageContext.request.contextPath}/logout"
-           class="mt-5" style="color:#e74c3c;">
-            🚪 Logout
-        </a>
+    <div class="sidebar p-0" style="width: 240px; min-width: 240px;">
+        <span class="brand">
+            <i class="bi bi-briefcase-fill me-2"></i>Job Tracker
+        </span>
+        <div class="mt-2">
+            <a href="${pageContext.request.contextPath}/dashboard"
+               class="active">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="${pageContext.request.contextPath}/application?action=add">
+                <i class="bi bi-plus-circle"></i> Add Application
+            </a>
+            <a href="${pageContext.request.contextPath}/application?action=list">
+                <i class="bi bi-list-ul"></i> My Applications
+            </a>
+            <a href="${pageContext.request.contextPath}/views/uploadResume.jsp">
+                <i class="bi bi-file-earmark-arrow-up"></i> Upload Resume
+            </a>
+        </div>
+        <div style="position: absolute; bottom: 20px; width: 240px;">
+            <a href="${pageContext.request.contextPath}/logout"
+               class="logout-link">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
     </div>
 
     <!-- Main Content -->
-    <div class="flex-grow-1 p-4">
+    <div class="flex-grow-1 main-content p-4">
 
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4>Welcome back, <%= userName %>! 👋</h4>
+            <div>
+                <h4 class="mb-0">Welcome back, <%= userName %>!</h4>
+                <small class="text-muted">
+                    Here is your job application summary
+                </small>
+            </div>
+            <a href="${pageContext.request.contextPath}/application?action=add"
+               class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Add Application
+            </a>
         </div>
 
         <!-- Stats Cards -->
         <div class="row mb-4">
             <div class="col-md-3 mb-3">
                 <div class="stat-card bg-primary">
-                    <h6>Total Applications</h6>
-                    <h2><%= totalApplications %></h2>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="mb-1" style="font-size:13px;">
+                                Total Applications
+                            </p>
+                            <h2 class="mb-0"><%= totalApplications %></h2>
+                        </div>
+                        <i class="bi bi-collection"
+                           style="font-size:2rem; opacity:0.7;"></i>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stat-card bg-warning">
-                    <h6>Applied</h6>
-                    <h2><%= totalApplied %></h2>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="mb-1" style="font-size:13px;">
+                                Applied
+                            </p>
+                            <h2 class="mb-0"><%= totalApplied %></h2>
+                        </div>
+                        <i class="bi bi-send"
+                           style="font-size:2rem; opacity:0.7;"></i>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stat-card bg-info">
-                    <h6>Interviews</h6>
-                    <h2><%= totalInterview %></h2>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="mb-1" style="font-size:13px;">
+                                Interviews
+                            </p>
+                            <h2 class="mb-0"><%= totalInterview %></h2>
+                        </div>
+                        <i class="bi bi-people"
+                           style="font-size:2rem; opacity:0.7;"></i>
+                    </div>
                 </div>
             </div>
             <div class="col-md-3 mb-3">
                 <div class="stat-card bg-success">
-                    <h6>Selected</h6>
-                    <h2><%= totalSelected %></h2>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="mb-1" style="font-size:13px;">
+                                Selected
+                            </p>
+                            <h2 class="mb-0"><%= totalSelected %></h2>
+                        </div>
+                        <i class="bi bi-check-circle"
+                           style="font-size:2rem; opacity:0.7;"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Recent Applications Table -->
         <div class="card shadow-sm">
-            <div class="card-header d-flex
-                        justify-content-between align-items-center">
-                <h5 class="mb-0">Recent Applications</h5>
-                <a href="${pageContext.request.contextPath}/application?action=add"
-                   class="btn btn-primary btn-sm">
-                   + Add New
+            <div class="card-header bg-white d-flex
+                        justify-content-between align-items-center py-3">
+                <h6 class="mb-0 fw-bold">Recent Applications</h6>
+                <a href="${pageContext.request.contextPath}/application?action=list"
+                   class="btn btn-outline-primary btn-sm">
+                    View All
                 </a>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 <% if (applications == null || applications.isEmpty()) { %>
-                    <div class="text-center py-4">
-                        <p class="text-muted">
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox"
+                           style="font-size:3rem; color:#dee2e6;"></i>
+                        <p class="text-muted mt-2">
                             No applications yet.
-                            Add your first application!
                         </p>
                         <a href="${pageContext.request.contextPath}/application?action=add"
-                           class="btn btn-primary">
-                           Add Application
+                           class="btn btn-primary btn-sm">
+                            Add your first application
                         </a>
                     </div>
                 <% } else { %>
-                    <table class="table table-hover">
-                        <thead>
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
                             <tr>
                                 <th>#</th>
                                 <th>Company</th>
@@ -149,7 +228,7 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
                                for (JobApplication app : applications) { %>
                             <tr>
                                 <td><%= i++ %></td>
-                                <td><%= app.getCompanyName() %></td>
+                                <td><strong><%= app.getCompanyName() %></strong></td>
                                 <td><%= app.getJobRole() %></td>
                                 <td>
                                     <%
@@ -172,12 +251,12 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
                                 <td>
                                     <a href="${pageContext.request.contextPath}/application?action=edit&id=<%= app.getId() %>"
                                        class="btn btn-sm btn-outline-primary">
-                                       Edit
+                                       <i class="bi bi-pencil"></i>
                                     </a>
                                     <a href="${pageContext.request.contextPath}/application?action=delete&id=<%= app.getId() %>"
                                        class="btn btn-sm btn-outline-danger"
                                        onclick="return confirm('Delete this application?')">
-                                       Delete
+                                       <i class="bi bi-trash"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -190,6 +269,5 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 
     </div>
 </div>
-
 </body>
 </html>
